@@ -10,9 +10,9 @@
  * PURPOSE.
  *
  * This software released under LGPLv3 license.
- * Author: Jing Lu <dujid0@gmail.com>
+ * Author: Jing Lu <dujid0 at gmail.com>
  * 
- * Copyright (c) 2012-2013 unvell.com, all rights reserved.
+ * Copyright (c) 2012-2014 unvell.com, all rights reserved.
 -->
 
 <test-suite id="071" name="eval">
@@ -51,7 +51,7 @@
       }();
    
       // global variable should not be changed
-      t( a, null );
+      t( a, undefined );
       
     </script>
   </test-case>
@@ -68,7 +68,7 @@
       t( obj.color, 'red' );
       
       t( typeof obj.eat, 'function' );
-      t( obj.eat(), null );
+      t( obj.eat(), undefined );
       
     </script>
   </test-case>

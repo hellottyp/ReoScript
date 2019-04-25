@@ -10,9 +10,9 @@
  * PURPOSE.
  *
  * This software released under LGPLv3 license.
- * Author: Jing Lu <dujid0@gmail.com>
+ * Author: Jing Lu <dujid0 at gmail.com>
  * 
- * Copyright (c) 2012-2013 unvell.com, all rights reserved.
+ * Copyright (c) 2012-2014 unvell.com, all rights reserved.
 -->
 
 <test-suite id="012" name="date">
@@ -22,14 +22,58 @@
       var t = debug.assert;
 
       t( new Date() != null );
-      t( new Date().getDate() != 0 );
 
-      var date = new Date();
-      var day = date.getDate();
+      var date = new Date(1990,0,24);
 
       t( date != null );
-      t( day != null );
-      
+
+      t( date.getFullYear() == 1990);
+      t( date.getYear() == 90);
+      t( date.getMonth() == 0);
+      t( date.getDate() == 24 );
+      t( date.getHours() == 0 );
+      t( date.getMinutes() == 0 );
+      t( date.getSeconds() == 0 );
+      t( date.getMilliseconds() == 0 );
+
+      date = new Date(2019,3,23,18,6,32,23);
+
+      t(date.getDay() == 2); //week
+
+      t( date.getHours() == 18 );
+      t( date.getMinutes() == 6 );
+      t( date.getSeconds() == 32 );
+      t( date.getMilliseconds() == 23 );
+      t( date.getTime(),1556013992023);
+
+      t(Date.UTC(2019,3,23,18,6,32,23),1556013992023);
+
+      t( date.getTimezoneOffset(),-480);
+
+      date.setFullYear(2000);
+
+      t( date.getFullYear() , 2000);
+
+      date.setMonth(2);
+
+      t( date.getMonth(),2);
+
+      date.setDate(17);
+
+      t( date.getDate(),17);
+
+      date.setHours(17);
+
+      t( date.getHours(),17);
+
+      date.setMinutes(18);
+
+      t( date.getMinutes(),18);
+
+      date.setSeconds(19);
+
+      t( date.getSeconds(),19);
+
     </script>
   </test-case>
 

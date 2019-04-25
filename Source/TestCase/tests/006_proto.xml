@@ -10,9 +10,9 @@
  * PURPOSE.
  *
  * This software released under LGPLv3 license.
- * Author: Jing Lu <dujid0@gmail.com>
+ * Author: Jing Lu <dujid0 at gmail.com>
  * 
- * Copyright (c) 2012-2013 unvell.com, all rights reserved.
+ * Copyright (c) 2012-2014 unvell.com, all rights reserved.
 -->
 
 <test-suite id="006" name="proto">
@@ -84,7 +84,7 @@
       var t = debug.assert;
 
       var str = "hello world";
-      t( str.fun == null );
+      t( str.fun == undefined );
       
       String.prototype.fun = function() {};
       t( str.fun != null );
@@ -101,13 +101,13 @@
 
       function A() { }
       var a = new A(), b = { };
-      
+
       A.prototype.age = 10;
 
       t( a.age == 10 );
       t( a.hasOwnProperty('age') == false );
-      
-      t( b.age == null );
+
+      t( b.age == undefined );
       t( b.hasOwnProperty('age') == false );
 
     </script>
@@ -164,5 +164,25 @@
       
     </script>
   </test-case>
+  
+  <test-case id="009" name="override to prototype">
+    <script>
+      var t = debug.assert;
 
+      Array.prototype.aa = 10;
+
+      var a = [];
+      t(a.aa, 10);
+
+      a.aa += 5;
+      t(Array.prototype.aa, 10);
+      t(a.aa, 15);
+
+      a.aa=null;
+      
+      t(a.aa, null);
+      t(Array.prototype.aa, 10);
+
+    </script>
+  </test-case>
 </test-suite>

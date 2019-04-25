@@ -1,3 +1,49 @@
+v1.4.5 4/13/2019
+
+ - Fixed: only boolean expression can be used as test condition,etc:if,for,?:.
+ - Fixed: string and number operator,etc:"67" * 1,91-'1'
+ - Fixed: typeof function
+ - Fixed: undefined == null
+ - Fixed: 'parseInt' method bug
+ - Fixed: fixed Unary operator '!'
+ - Fixed: 'substr' method for string object
+ - Fixed: NaN == NaN,return false
+ - New: add 'parseFloat' method
+ - New: add 'null' object
+ - New: add arguments object 
+ - New: add 'substring','concat','match','replace','search' method to String object
+ - New: add 'asin','acos','ceil' method to Math object
+ - New: add 'pop','shift','unshift','reserve' to Array object
+ - New: add 'toFixed','toPrecision','toExponential' method to Number object
+ - New: add RegExp object
+ - New:escape,unescape,isFinite 
+ - New:'sort' method support iterator,such as:arr.sort(function(a,b){return a-b;});
+ - -- New:add 'isPrototypeOf' to Object object
+ - Changed: bool var toString to be a low case word
+
+
+v1.4.4 4/23/2013
+ - Fixed: Cannot detech an event via DirectAccess mode
+ - Fixed: Shell: Cannot enter console mode without target files specified
+ - Changed: Shell: expression without ? prefix also could be evaluated in console
+
+v1.4.3 2/20/2013
+ - Fixed: cannot accessing field member and event in ScriptVisible mode
+ - Changed interface define of ExternalVariableAccessor for ScriptContext
+
+v1.4.2 1/10/2013
+ - New: Accessing index property of .NET objects 
+ - New: Accessing static member of .NET types
+ - New: Create .NET type by using full name of type
+ - New: Create .NET inner type from another type
+ - Fixed: When call .NET methods by name may get an incorrected method to call
+ - Changed: Accessing array by pass null argument will cause exception
+
+v1.4 12/22/2013
+ - New: Load script from fixed culture
+ - New: New .NET Access Mode: ScriptVisible Attribute
+ - New: Add Demo 'FirstApp'
+ - Changed: namespace changed to 'unvell' from 'Unvell'
 
 v1.3.1  12/12/2013
  - New: Global Variable Getter/Setter

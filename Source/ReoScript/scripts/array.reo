@@ -10,7 +10,7 @@
  * PURPOSE.
  *
  * This software released under LGPLv3 license.
- * Author: Jing Lu <dujid0@gmail.com>
+ * Author: Jing Lu <dujid0 at gmail.com>
  *
  * Copyright (c) 2012-2013 unvell.com, all rights reserved.
  * 
@@ -83,7 +83,6 @@ if (Array != null && Array.prototype != null) {
       var val = (selector == null ? element : selector(element));
       if(max == null || max < val) min = val;
     }
-
 		return max;
 	};
 

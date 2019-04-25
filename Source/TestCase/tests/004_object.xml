@@ -10,9 +10,9 @@
  * PURPOSE.
  *
  * This software released under LGPLv3 license.
- * Author: Jing Lu <dujid0@gmail.com>
+ * Author: Jing Lu <dujid0 at gmail.com>
  * 
- * Copyright (c) 2012-2013 unvell.com, all rights reserved.
+ * Copyright (c) 2012-2014 unvell.com, all rights reserved.
 -->
 
 <test-suite id="004" name="object">
@@ -182,10 +182,10 @@
       t( a.b != 10 );
 
       delete a.hello;
-      t( a.hello == null );
-      
+      t( a.hello == undefined );
+
       delete a.b;
-      t( a.b == null );
+      t( a.b == undefined );
 
     </script>
   </test-case>
@@ -204,7 +204,7 @@
       t( obj != null );
       t( obj.a == 10 );
       t( obj.b == 20 );
-      t( obj.c == null );
+      t( obj.c == undefined );
       t( obj.d == 40 );
 
     </script>

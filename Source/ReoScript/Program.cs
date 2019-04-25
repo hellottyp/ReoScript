@@ -12,7 +12,7 @@
  * This software released under LGPLv3 license.
  * Author: Jing Lu <dujid0@gmail.com>
  * 
- * Copyright (c) 2012-2013 unvell.com, all rights reserved.
+ * Copyright (c) 2012-2014 unvell.com, all rights reserved.
  * 
  ****************************************************************************/
 
@@ -21,7 +21,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
 
-namespace Unvell.ReoScript
+namespace unvell.ReoScript
 {
 	static class Program
 	{

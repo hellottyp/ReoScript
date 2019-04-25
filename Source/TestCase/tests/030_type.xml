@@ -10,9 +10,9 @@
  * PURPOSE.
  *
  * This software released under LGPLv3 license.
- * Author: Jing Lu <dujid0@gmail.com>
+ * Author: Jing Lu <dujid0 at gmail.com>
  * 
- * Copyright (c) 2012-2013 unvell.com, all rights reserved.
+ * Copyright (c) 2012-2014 unvell.com, all rights reserved.
 -->
 
 <test-suite id="030" name="typeof">
@@ -20,32 +20,24 @@
   <test-case id="001" name="unary">
     <script>
       var t = debug.assert;
-      
+
       t( typeof 'a', 'string' );
       t( typeof 10, 'number' );
-      
+
       t( typeof {a:10}, 'object' );
-      
+
       t( typeof [{}][0], 'object' );
       t( typeof Function, 'function' );
       t( typeof function(){}, 'function' );
-      
-      t( typeof null, 'null' );
-      t( typeof undefined, 'null' );
-      
+
+      t( typeof null, 'object' );
+      t( typeof undefined, 'undefined' );
+
+      t( typeof NaN,'number');
+
     </script>
   </test-case>
 
-  <!--<test-case id="002" name="array and date">
-    <script>
-      var t = debug.assert;
-
-      // since v1.2 Array and Date also be 'object'
-      
-      //t( typeof [1,2,3], 'Array' );
-      //t( typeof (new Date()), 'Date' );
-    </script>
-  </test-case>-->
 
   <test-case id="002" name="object wrap">
     <script>

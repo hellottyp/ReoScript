@@ -10,26 +10,13 @@
  * PURPOSE.
  *
  * This software released under LGPLv3 license.
- * Author: Jing Lu <dujid0@gmail.com>
+ * Author: Jing Lu <dujid0 at gmail.com>
  * 
- * Copyright (c) 2012-2013 unvell.com, all rights reserved.
+ * Copyright (c) 2012-2014 unvell.com, all rights reserved.
 -->
 
 <test-suite id="023" name="return">
 
-  <test-case id="001" name="entry function">
-    <script>
-			var t = debug.assert;
-    
-      t( true );
-      
-      return; // return in entry function
-      
-      t( false ); // should not be executed
-			
-		</script>
-  </test-case>
-  
   <test-case id="001" name="entry function">
     <script>
 			var t = debug.assert;

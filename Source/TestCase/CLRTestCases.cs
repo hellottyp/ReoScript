@@ -10,22 +10,181 @@
  * PURPOSE.
  *
  * This software released under LGPLv3 license.
- * Author: Jing Lu <dujid0@gmail.com>
+ * Author: Jing Lu <dujid0 at gmail.com>
  * 
- * Copyright (c) 2012-2013 unvell.com, all rights reserved.
+ * Copyright (c) 2012-2014 unvell.com, all rights reserved.
  * 
  ****************************************************************************/
 
+using System;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace Unvell.ReoScript.TestCase
+namespace unvell.ReoScript.TestCase
 {
 	[TestSuite]
 	class ReoScriptTestSuite
 	{
 		public ScriptRunningMachine SRM { get; set; }
 	}
+
+	[TestSuite]
+	class BasicTest
+	{
+		[TestCase]
+		void SRMInitTime()
+		{
+			ScriptRunningMachine srm = new ScriptRunningMachine();
+			srm.Reset();
+		}
+
+		[TestCase]
+		void ExternalVariableTest()
+		{
+			var srm = new ScriptRunningMachine();
+			srm["a"] = 10;
+			srm.Run("var b = a + 20; ");
+
+			TestCaseAssertion.AssertEquals(srm["b"], 30d);
+		}
+
+#if EXTERNAL_VARIABLE_ACCESSOR
+		[TestCase]
+		public void ExtendedVariableAccessor()
+		{
+			var srm = new ScriptRunningMachine();
+
+			var ctx = srm.CreateContext();
+
+			ctx.ExternalVariableGetter = (id) =>
+			{
+				if (id.StartsWith("$"))
+					return id.Substring(1);
+				else
+					return null;
+			};
+
+			string result = Convert.ToString(srm.CalcExpression("$A1", ctx));
+
+			TestCaseAssertion.AssertEquals(result, "A1");
+		}
+#endif
+	}
+
+	#region Wrapper
+	[TestSuite("Wrapper Interface")]
+	class WrapperTest : ReoScriptTestSuite
+	{
+		public int Add(int a, int b)
+		{
+			return a + b;
+		}
+
+		[TestCase]
+		public void WrapperObject()
+		{
+			var srm = SRM;
+
+			var myobj = new ObjectValue();
+
+			string externalProperty = string.Empty;
+
+			myobj["external"] = new ExternalProperty(
+				() => externalProperty,
+				(v) => { externalProperty = System.Convert.ToString(v); }
+				);
+
+			myobj["add"] = new NativeFunctionObject("add", (ctx, owner, args) =>
+			{
+				return (double)args[0] + (double)args[1];
+			});
+
+			srm["myobj"] = myobj;
+
+			srm.Run(@"
+
+myobj.name = 'hello';
+myobj.external = 'world'; 
+var result = myobj.add(1,2);
+
+debug.assert(myobj.name, 'hello');
+debug.assert(result, 3);
+
+");
+
+		}
+	}
+
+	[TestSuite]
+	class BasicAccess : ReoScriptTestSuite
+	{
+		[TestCase]
+		void DictionaryAccess()
+		{
+			Dictionary<string, object> dic = new Dictionary<string, object>();
+
+			dic["name"] = "hello";
+
+			SRM["myobj"] = dic;
+
+			SRM.Run(@" debug.assert( myobj.name, 'hello' ); ");
+		}
+
+		[TestCase]
+		public void FuncCall()
+		{
+			SRM["myfunc"] = (System.Func<int, int, int>)((a, b) =>
+			{
+				return a + b;
+			});
+
+			SRM.Run(@"debug.assert( myfunc(1, 2), 3 );");
+		}
+
+		[TestCase]
+		public void ExtendedObjectValue()
+		{
+			var extObj = new MyObjectValue();
+
+			SRM["extObj"] = extObj;
+
+			SRM.Run("extObj.testProp = 'a';");
+			TestCaseAssertion.AssertTrue(extObj.ValueSetted);  // true
+			TestCaseAssertion.AssertTrue(!extObj.ValueGetted); // false
+
+			SRM.Run("var a = extObj.testProp;");
+			TestCaseAssertion.AssertTrue(extObj.ValueSetted);  // true
+			TestCaseAssertion.AssertTrue(extObj.ValueGetted);  // true
+
+			extObj = new MyObjectValue();
+
+			//SRM.Run("extObj.testProp = 'a';");
+			TestCaseAssertion.AssertTrue(!extObj.ValueSetted);  // true
+			TestCaseAssertion.AssertTrue(!extObj.ValueGetted); // false
+		}
+	}
+	
+	class MyObjectValue : ObjectValue
+	{
+		public bool ValueGetted { get; set; }
+		public bool ValueSetted { get; set; }
+
+		public override bool TryGetValue(string identifier, out object value)
+		{
+			if (identifier == "testProp") ValueGetted = true;
+			return base.TryGetValue(identifier, out value);
+		}
+
+		public override bool TrySetValue(string identifier, object value)
+		{
+			if (identifier == "testProp") ValueSetted = true;
+			return base.TrySetValue(identifier, value);
+		}
+	}
+
+	#endregion
+
+	#region DirectAccess
 
 	class Friut {
 		public string Name { get; set; }
@@ -83,7 +242,7 @@ namespace Unvell.ReoScript.TestCase
 		public bool Contains(KeyValuePair<string, object> item)
 		{
 			object o;
-			if(!(stuff.TryGetValue(item.Key, out o))) return false;
+			if (!(stuff.TryGetValue(item.Key, out o))) return false;
 			return o == item.Value;
 		}
 
@@ -133,6 +292,15 @@ namespace Unvell.ReoScript.TestCase
 		#endregion
 	}
 
+	class EventStub
+	{
+		public event EventHandler DummyEvent;
+
+		public void RaiseEvent()
+		{
+			if (DummyEvent != null) DummyEvent(this, null);
+		}
+	}
 
 	[TestSuite("DirectAccess")]
 	class DirectAccessTests : ReoScriptTestSuite
@@ -156,7 +324,7 @@ var t = debug.assert;
 
 var apple = new Friut();
 
-t(typeof apple, 'native object');
+t(typeof apple, 'object');
 t(apple instanceof Friut);
 
 ");
@@ -174,7 +342,7 @@ var t = debug.assert;
 
 var apple = new MyClass();
 
-t(typeof apple, 'native object');
+t(typeof apple, 'object');
 t(apple instanceof MyClass);
 
 ");
@@ -297,38 +465,401 @@ t(obj.startTime, date);
 
 			SRM.Run(@"
 
+");
+		}
+
+		[TestCase]
+		public void NewKeyword()
+		{
+			SRM.ImportType(typeof(ArrayList));
+
+			SRM.Run(@"b
+var arr1 = new ArrayList();
+debug.assert( arr1 != null );
+
+var arr2 = new ArrayList;
+debug.assert( arr2 != null );
+
+var alias = ArrayList;
+debug.assert( new alias() != null );
+debug.assert( new alias != null );
+
+");
+
+		}
+
+		[TestCase( WorkMode = MachineWorkMode.Full)]
+		public void ImportNamespace()
+		{
+			SRM.ImportNamespace("System.Windows.Forms");
+			SRM.ImportNamespace("System.Drawing");
+
+			SRM.Run(@"
 var t = debug.assert;
 
-var date = new Date();
+t( Color != null );
+t( Color.Red != null );
 
-obj.name = 'red alert';
-obj.startTime = date;
+");
 
-var o = '';
-for(name in obj) {
-  o+=name + ' ';
-}
+		}
 
-t(o, 'name startTime ');
+		
+		[TestCase]
+		public void CLRArrayPrototype()
+		{
+			int[] arr = { 1, 2, 3, 4, 5 };
+
+			SRM["arr"] = arr;
+			SRM.Run(@"
+var t = debug.assert;
+
+t( arr[0], 1 );
+t( arr.length, 5 );
+t( arr.join('.'), '1.2.3.4.5' );
 
 ");
 		}
 
-		[TestCase("CLR Attribute Property")]
+		class MyArrayStub
+		{
+			int[] arr = new int[10];
+			public int this[int i] { get { return arr[i]; } set { arr[i] = value; } }
+			public int this[string key]
+			{
+				get { return arr[ScriptRunningMachine.GetIntValue(key.Substring(4))]; }
+				set
+				{
+					int idx = ScriptRunningMachine.GetIntValue(key.Substring(4));
+					arr[idx] = value;
+				}
+			}
+			public int Length { get { return arr.Length; } }
+		}
+
+		class MyListStub : List<object>
+		{
+			int this[string key] { get { return int.Parse(key.Substring(4)); } set { } }
+		}
+
+		[TestCase("CLR Array Index (Number)", WorkMode=FullWorkMode)]
+		public void CLRArrayIndexNumber()
+		{
+			int[] arr = new int[10];
+
+			for (int i = 0; i < arr.Length; i++)
+			{
+				arr[i] = i;
+			}
+
+			SRM["arr"] = arr;
+			SRM.Run(@" 
+debug.assert(arr.length, 10);
+
+for(var i=0;i<arr.length;i++) {
+  debug.assert( arr[i], i );
+}");
+
+			SRM["myarr"] = new MyArrayStub();
+			SRM.Run(@"
+debug.assert(myarr.length, 10);
+
+for(var i=0;i<myarr.length;i++) {
+  myarr[i] = i;
+	debug.assert( myarr[i], i );
+}");
+		}
+
+		[TestCase("CLR Array Index (String)", WorkMode = FullWorkMode)]
+		public void CLRArrayIndexString()
+		{
+			SRM["myarr"] = new MyArrayStub();
+			SRM.Run(@"
+for(var i=0;i<myarr.length;i++) {
+  myarr['item'+i] = i;
+	debug.assert( myarr['item'+i], i );
+}");
+
+			SRM["mylist"] = new MyListStub();
+			SRM.Run(@"
+for(var i=0;i<mylist.length;i++) {
+  mylist['item' + i] = i;
+	debug.assert( mylist['item'+ i], i );
+}");
+		}
+
+		[TestCase(WorkMode = FullWorkMode)]
+		public void StaticMemberAccess()
+		{
+			SRM.ImportType(typeof(System.Drawing.Color));
+
+			SRM.Run(@"
+debug.assert(Color.Yellow, 'Color [Yellow]');
+
+debug.assert(System.Drawing.SystemColors.Control != null);
+
+debug.assert(Color.Yellow, System.Drawing.Color.Yellow);
+
+");
+		}
+
+		public class StaticA
+		{
+			public class StaticB { }
+		}
+
+		[TestCase(Disabled=true)] // Not Supported Yet
+		public void InnerClasssAccess()
+		{
+			SRM.ImportType(typeof(StaticA.StaticB));
+
+			SRM.Run(@"
+debug.assert( Test.StaticA.StaticB != null );
+debug.assert( new StaticB() != null );
+");
+		}
+
+		class StaticClassTest
+		{
+			public static int A = 10;
+		}
+
+		[TestCase]
+		public void StaticMemberModify()
+		{
+			SRM.ImportType(typeof(StaticClassTest));
+
+			SRM.Run(@"
+debug.assert( StaticClassTest != null );
+debug.assert( StaticClassTest.a, 10 );
+StaticClassTest.a = 20;
+debug.assert( StaticClassTest.a, 20 );
+");
+
+		}
+
+		[TestCase("CLR Attribute Property",Disabled=true)]
 		public void CLRAttributeProperty()
 		{
 
 		}
 
-		[TestCase("CLR Attribute Method")]
+		[TestCase("CLR Attribute Method",Disabled=true)]
 		public void CLRAttributeMethod()
 		{
-
 		}
 
 		[TestCase("TestCase Template", Disabled=true)]
 		public void TestCaseTemplate()
 		{
 		}
+
+		[TestCase(WorkMode = MachineWorkMode.AllowDirectAccess | MachineWorkMode.AllowCLREventBind)]
+		public void EventBindTest()
+		{
+			var c = new EventStub();
+
+			SRM["c"] = c;
+
+			SRM.Run(@"
+var t = debug.assert;
+t( c.DummyEvent, undefined );
+var a = 10;
+c.DummyEvent = function() {
+  a = 20;
+};
+debug.assertTrue( c.DummyEvent != null, 'event not be attached' );
+");
+
+			c.RaiseEvent();
+
+			SRM.Run(@"
+t( a, 20 );
+t( c.DummyEvent != null );
+
+c.DummyEvent = null;
+
+debug.assertTrue( c.DummyEvent == undefined, 'event not be detached.' );
+");
+
+		}
+
 	}
+	#endregion // DirectAccess
+
+	#region ScriptVisible
+	[ScriptVisible]
+	class Contact
+	{
+		[ScriptVisible] 
+		public string Name { get; set; }
+
+		[ScriptVisible]
+		public int FieldMember { get; set; }
+
+		[ScriptVisible]
+		public event EventHandler EventMember;
+
+		public event EventHandler EventWithoutScriptVisible;
+
+		[ScriptVisible] 
+		public List<string> PhoneNumbers { get; set; }
+
+		public string Remark { get; set; }
+
+		public Contact()
+		{
+			this.PhoneNumbers = new List<string>();
+		}
+
+		internal void RaiseEventMember()
+		{
+			if (this.EventMember != null)
+			{
+				this.EventMember(this, null);
+			}
+		}
+
+		internal void RaiseEventMemberWithoutScriptVisible()
+		{
+			if (this.EventWithoutScriptVisible != null)
+			{
+				this.EventWithoutScriptVisible(this, null);
+			}
+		}
+	}
+
+	[TestSuite("AttributeVisible")]
+	class AttributeExtensionTests : ReoScriptTestSuite
+	{
+		[TestCase(WorkMode=MachineWorkMode.Default)]
+		public void CallCLR()
+		{
+			SRM["contact"] = new Contact();
+
+			string script = @"
+
+var t = debug.assert;
+
+contact.name = 'reo';
+
+t( contact.phoneNumbers != null );
+
+contact.phoneNumbers.add('01-234-567');
+
+t( contact.name, 'reo' );
+t( contact.phoneNumbers.length, 1 );
+t( contact.phoneNumbers[0], '01-234-567' );
+
+// access invisible property
+contact.remark = 'comment';
+t( contact.remark, undefined );
+
+";
+
+			SRM.Run(script);
+		}
+
+		[TestCase(WorkMode = MachineWorkMode.Default)]
+		public void ImportType()
+		{
+			SRM.ImportType(typeof(Contact));
+
+			string script = @"
+
+var t = debug.assert;
+
+var contact = new Contact();
+
+contact.name = 'reo';
+
+t( contact.phoneNumbers != null );
+
+contact.phoneNumbers.add('01-234-567');
+
+t( contact.name, 'reo' );
+t( contact.phoneNumbers.length, 1 );
+t( contact.phoneNumbers[0], '01-234-567' );
+
+// access invisible property
+contact.remark = 'comment';
+t( contact.remark, undefined );
+
+";
+
+			SRM.Run(script);
+		}
+
+		// for test bug #1
+		[TestCase(WorkMode = MachineWorkMode.Default)]
+		public void FieldAndEventMember()
+		{
+			SRM["c"] = new Contact();
+
+			SRM.Run(@"
+
+var t = debug.assert;
+
+c.fieldMember = 10;
+
+t( c.fieldMember, 10 );
+
+c.eventMember = function(){
+  this.fieldMember = 20;
+};
+
+");
+
+			((Contact)SRM["c"]).RaiseEventMember();
+
+			SRM.Run(@"
+
+var t = debug.assert;
+
+t( c.fieldMember, 20 );
+
+c.eventMember = null; // remove event
+c.fieldMember = 10;
+
+");
+			((Contact)SRM["c"]).RaiseEventMember();
+
+			SRM.Run(@"
+
+var t = debug.assert;
+
+t( c.fieldMember, 10 );
+
+");
+		}
+
+		[TestCase(WorkMode = MachineWorkMode.Default)]
+		public void EventTest()
+		{
+			SRM["c"] = new Contact();
+
+			SRM.Run(@"
+var t = debug.assert;
+t( c.EventMember, undefined );
+var a = 10;
+c.EventMember = function() {
+  a = 20;
+};
+t( c.EventMember != null );
+");
+
+			((Contact)SRM["c"]).RaiseEventMember();
+
+			SRM.Run(@"
+t( a, 20 );
+t( c.EventMember != null );
+c.EventMember = null;
+t( c.EventMember, undefined );
+");
+
+		}
+
+	}
+	#endregion // ScriptVisible
+
 }

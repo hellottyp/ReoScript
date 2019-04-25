@@ -1,0 +1,68 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<!--
+ * ReoScript - .NET Script Language Engine
+ * 
+ * http://www.unvell.com/ReoScript
+ *
+ * THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY
+ * KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR
+ * PURPOSE.
+ *
+ * This software released under LGPLv3 license.
+ * Author: Jing Lu <dujid0 at gmail.com>
+ * 
+ * Copyright (c) 2012-2014 unvell.com, all rights reserved.
+-->
+
+<test-suite id="082" name="RegExp">
+
+  <test-case id="001" name="RegExp.test">
+    <script>
+      var t = debug.assert;
+
+      var s = "abc";
+      var re = new RegExp("abc","ig");
+
+      t(re.test(s),true);
+      t(re.test(s),false);
+
+      
+    </script>
+  </test-case>
+
+  <test-case id="002" name="RegExp.exec">
+    <script>
+      var t = debug.assert;
+
+      var s = "abc def ikj";
+      var re = new RegExp("\\b\\w+\\b","ig");
+
+      t(re.exec(s),'["abc"]');
+      t(re.exec(s),'["def"]');
+      t(re.exec(s),'["ikj"]');
+      t(re.exec(s), null);
+
+      var s1 = "aaa1 bbb2 ccc3";
+      var reg = new RegExp("\\b(\\w+)(\\d{1})\\b","g");
+
+      t(reg.exec(s1),'["aaa1","aaa","1"]');
+      t(reg.exec(s1),'["bbb2","bbb","2"]');
+      t(reg.exec(s1),'["ccc3","ccc","3"]');
+
+    </script>
+  </test-case>
+
+  <test-case id="003" name="RegExp.compile">
+    <script>
+      var t = debug.assert;
+
+      var a = new RegExp("abc","img");
+      var b = a.compile("ade","ig");
+
+      t(b.test("ade"));
+
+    </script>
+  </test-case>
+
+</test-suite>
