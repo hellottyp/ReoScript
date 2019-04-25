@@ -1,10 +1,10 @@
 # ReoScript
 
-ReoScript is an ECMAScript script language interpreter designed to integrate in .NET program. ReoScript makes your application can run script program.
+ReoScript is an ECMAScript full script language interpreter designed to integrate in .NET program. ReoScript makes your application can run script program.
 
 ## Features
 
-* ECMAScript syntax
+* ECMAScript full syntax
 * Various methods support to integrate into .NET application
 * Support to add customize objects, types and functions
 * Directly access to .NET classes; including using .NET framework classes
